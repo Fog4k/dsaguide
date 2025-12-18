@@ -1,0 +1,118 @@
+@{
+    ViewData["Title"] = "Array Visualizer";
+}
+
+<h1>Array — Insert / Delete / Update / Visualization</h1>
+
+<p>
+    Array — структура фиксированных ячеек, доступ по индексу → <strong>O(1)</strong>,
+    вставка/удаление → <strong>O(n)</strong> (потому что нужно сдвигать элементы).
+</p>
+
+<div class="visual-box">
+
+    <h3>Array Controls</h3>
+
+    <input id="arr-value" class="ll-input" placeholder="Value" />
+    <input id="arr-index" class="ll-input" placeholder="Index" />
+
+    <button onclick="arr_insert()">Insert</button>
+    <button onclick="arr_delete()">Delete</button>
+    <button onclick="arr_update()">Update</button>
+    <button onclick="arr_random()">Random Fill</button>
+
+    <div id="arr-canvas" style="margin-top:20px;"></div>
+</div>
+
+<style>
+.arr-box {
+    display:inline-block;
+    padding:10px 14px;
+    margin:4px;
+    background:#1e232d;
+    border:1px solid #3a3f4b;
+    border-radius:6px;
+    color:white;
+    font-weight:600;
+    min-width:40px;
+    text-align:center;
+}
+.arr-index {
+    font-size:11px;
+    color:#999;
+}
+.arr-highlight {
+    background:#264a7f !important;
+    border-color:#58a6ff !important;
+}
+</style>
+
+<script>
+let arr = [];
+
+function arr_render(highlightIndex=null){
+    let c=document.getElementById("arr-canvas");
+    c.innerHTML="";
+
+    if(arr.length===0){
+        c.innerHTML="<p style='color:#777'>Array empty</p>";
+        return;
+    }
+
+    arr.forEach((v,i)=>{
+        let box = document.createElement("div");
+        box.className="arr-box";
+        if(i===highlightIndex) box.classList.add("arr-highlight");
+
+        box.innerHTML =
+            `<div>${v}</div>
+             <div class='arr-index'>[${i}]</div>`;
+
+        c.appendChild(box);
+    });
+}
+
+function arr_insert(){
+    let v=document.getElementById("arr-value").value.trim();
+    let idx=document.getElementById("arr-index").value.trim();
+    if(!v) return alert("Value is empty");
+    idx = idx==="" ? arr.length : Number(idx);
+    if(idx<0||idx>arr.length) return alert("Invalid index");
+
+    arr.splice(idx,0,v);
+    arr_render(idx);
+}
+
+function arr_delete(){
+    let idx=document.getElementById("arr-index").value.trim();
+    if(idx==="") return alert("Index empty");
+    idx=Number(idx);
+    if(idx<0||idx>=arr.length) return alert("Invalid index");
+
+    arr.splice(idx,1);
+    arr_render();
+}
+
+function arr_update(){
+    let v=document.getElementById("arr-value").value.trim();
+    let idx=document.getElementById("arr-index").value.trim();
+    if(!v) return alert("Value empty");
+    if(idx==="") return alert("Index empty");
+    idx=Number(idx);
+
+    if(idx<0||idx>=arr.length) return alert("Invalid index");
+
+    arr[idx]=v;
+    arr_render(idx);
+}
+
+function arr_random(){
+    arr=[];
+    for(let i=0;i<8;i++){
+        arr.push(Math.floor(Math.random()*50));
+    }
+    arr_render();
+}
+
+arr_render();
+</script>

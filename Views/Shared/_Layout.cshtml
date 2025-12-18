@@ -1,0 +1,34 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - DSA Guide</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css" />
+    <script src="/js/site.js" defer></script>
+</head>
+
+<body>
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="logo">DSA GUIDE</div>
+
+            <ul class="nav-links">
+                <li><a href="/Home/Index">HOME</a></li>
+                <li><a href="/Topics/Array">ARRAY</a></li>
+                <li><a href="/Topics/LinkedList">LISTS</a></li>
+                <li><a href="/Topics/BinarySearchTree">TREES</a></li>
+                <li><a href="/Topics/Graph">GRAPHS</a></li>
+                <li><a href="/Topics/Algorithms">ALGORITHMS</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <main class="container">
+        @RenderBody()
+    </main>
+</body>
+</html>

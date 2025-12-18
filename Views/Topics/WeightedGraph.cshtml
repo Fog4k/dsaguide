@@ -1,0 +1,106 @@
+@{
+    ViewData["Title"] = "Weighted Graph";
+}
+
+<h1>Weighted Graph — Visualization</h1>
+
+<p>
+    Click node A → click node B → будешь спрошен о весе ребра.  
+</p>
+
+<div class="visual-box">
+    <button onclick="wg_clear()">Clear</button>
+
+    <h3 style="margin-top:15px;">Adjacency List</h3>
+    <pre id="wg-list" style="background:#111;padding:10px;border-radius:6px;"></pre>
+
+    <canvas id="wg-canvas" width="800" height="500"
+            style="margin-top:20px; background:#0d1117; border:1px solid #333; border-radius:8px;"></canvas>
+</div>
+
+<script>
+let wg_nodes=[];
+let wg_edges=[];
+let wg_sel=null;
+
+const wgc=document.getElementById("wg-canvas");
+const wctx=wgc.getContext("2d");
+
+wgc.addEventListener("click", wg_click);
+
+function wg_click(e){
+    let r=wgc.getBoundingClientRect();
+    let x=e.clientX-r.left, y=e.clientY-r.top;
+    let hit=wg_findNode(x,y);
+
+    if(hit){
+        if(wg_sel===null){
+            wg_sel=hit;
+        } else if(wg_sel!==hit){
+            let w=prompt("Weight:");
+            if(w!==null && w.trim()!==""){
+                wg_edges.push([wg_sel,hit,Number(w)]);
+            }
+            wg_sel=null;
+        }
+    } else {
+        wg_nodes.push({x,y,id:wg_nodes.length});
+    }
+
+    wg_draw();
+}
+
+function wg_findNode(x,y){
+    return wg_nodes.find(n=>Math.hypot(n.x-x,n.y-y)<20) || null;
+}
+
+function wg_draw(){
+    wctx.clearRect(0,0,800,500);
+
+    // edges
+    wctx.strokeStyle="#aaa"; wctx.lineWidth=2;
+    for(let [a,b,w] of wg_edges){
+        wctx.beginPath();
+        wctx.moveTo(a.x,a.y);
+        wctx.lineTo(b.x,b.y);
+        wctx.stroke();
+
+        // weight label
+        let mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+        wctx.fillStyle="white";
+        wctx.fillText(w, mx, my);
+    }
+
+    // nodes
+    for(let n of wg_nodes){
+        wctx.beginPath();
+        wctx.fillStyle=(n===wg_sel? "#ffd966" : "#58a6ff");
+        wctx.arc(n.x,n.y,18,0,Math.PI*2);
+        wctx.fill();
+
+        wctx.fillStyle="black";
+        wctx.fillText(n.id,n.x-4,n.y+4);
+    }
+
+    wg_updateList();
+}
+
+function wg_updateList(){
+    let adj={};
+    for(let n of wg_nodes) adj[n.id]=[];
+    for(let [a,b,w] of wg_edges){
+        adj[a.id].push({to:b.id, weight:w});
+        adj[b.id].push({to:a.id, weight:w});
+    }
+    document.getElementById("wg-list").innerText = JSON.stringify(adj,null,2);
+}
+
+function wg_clear(){
+    wg_nodes=[];
+    wg_edges=[];
+    wg_sel=null;
+    wg_draw();
+}
+
+wg_draw();
+</script>

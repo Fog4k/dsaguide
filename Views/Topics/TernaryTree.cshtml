@@ -1,0 +1,163 @@
+@{
+    ViewData["Title"] = "Ternary Tree";
+}
+
+<h1>Ternary Tree — Visualization</h1>
+
+<p>
+    У каждого узла до трёх детей: left, middle, right.  
+    Вставка идёт по уровням (level-order). Значения в дереве уникальны.
+</p>
+
+<div class="visual-box">
+    <input id="tt-val" class="ll-input" placeholder="Value" />
+    <button onclick="tt_insert()">Insert</button>
+    <button onclick="tt_clear()">Clear</button>
+
+    <canvas id="ttCanvas" width="1200" height="600"
+            style="margin-top:20px; background:#0d1117; border-radius:12px; border:1px solid #333;"></canvas>
+</div>
+
+<script>
+class TTNode {
+    constructor(v){
+        this.value = v;
+        this.left = null;
+        this.mid = null;
+        this.right = null;
+        this.x = 0;
+        this.y = 0;
+    }
+}
+
+let ttRoot = null;
+
+function tt_exists(node, v){
+    if(!node) return false;
+    if(node.value === v) return true;
+    return tt_exists(node.left, v) ||
+           tt_exists(node.mid, v) ||
+           tt_exists(node.right, v);
+}
+
+function tt_insertNode(root, v){
+    const q = [root];
+    while(q.length){
+        const n = q.shift();
+        if(!n.left){
+            n.left = new TTNode(v);
+            return;
+        }
+        if(!n.mid){
+            n.mid = new TTNode(v);
+            return;
+        }
+        if(!n.right){
+            n.right = new TTNode(v);
+            return;
+        }
+        q.push(n.left, n.mid, n.right);
+    }
+}
+
+function tt_insert(){
+    let val = Number(document.getElementById("tt-val").value.trim());
+    if(isNaN(val)) return alert("Введите число");
+
+    if(!ttRoot){
+        ttRoot = new TTNode(val);
+    } else {
+        if(tt_exists(ttRoot, val)) return alert("Такое значение уже есть");
+        tt_insertNode(ttRoot, val);
+    }
+    tt_draw();
+}
+
+function tt_clear(){
+    ttRoot = null;
+    tt_draw();
+}
+
+// ==== CANVAS ====
+const ttCanvas = document.getElementById("ttCanvas");
+const ttCtx = ttCanvas.getContext("2d");
+
+function tt_layout(root){
+    const levels = [];
+    function dfs(node, depth){
+        if(!node) return;
+        if(!levels[depth]) levels[depth] = [];
+        levels[depth].push(node);
+        dfs(node.left, depth+1);
+        dfs(node.mid, depth+1);
+        dfs(node.right, depth+1);
+    }
+    dfs(root, 0);
+
+    const W = ttCanvas.width;
+    const levelH = 100;
+
+    levels.forEach((arr, depth)=>{
+        const gap = W / (arr.length + 1);
+        arr.forEach((node, i)=>{
+            node.x = gap * (i+1);
+            node.y = 80 + depth * levelH;
+        });
+    });
+}
+
+function tt_line(a,b){
+    ttCtx.beginPath();
+    ttCtx.moveTo(a.x, a.y);
+    ttCtx.lineTo(b.x, b.y);
+    ttCtx.strokeStyle = "#4b5563";
+    ttCtx.lineWidth = 2;
+    ttCtx.stroke();
+}
+
+function tt_node(n){
+    ttCtx.beginPath();
+    ttCtx.arc(n.x, n.y, 20, 0, Math.PI*2);
+    ttCtx.fillStyle = "#111827";
+    ttCtx.fill();
+    ttCtx.strokeStyle = "#a855f7";
+    ttCtx.lineWidth = 2;
+    ttCtx.stroke();
+
+    ttCtx.fillStyle = "#e5e7eb";
+    ttCtx.font = "13px Inter";
+    ttCtx.textAlign = "center";
+    ttCtx.textBaseline = "middle";
+    ttCtx.fillText(n.value, n.x, n.y);
+}
+
+function tt_draw(){
+    ttCtx.clearRect(0,0,ttCanvas.width,ttCanvas.height);
+    if(!ttRoot) return;
+
+    tt_layout(ttRoot);
+
+    function connect(n){
+        if(!n) return;
+        if(n.left) tt_line(n,n.left);
+        if(n.mid) tt_line(n,n.mid);
+        if(n.right) tt_line(n,n.right);
+        connect(n.left);
+        connect(n.mid);
+        connect(n.right);
+    }
+
+    function drawNodes(n){
+        if(!n) return;
+        drawNodes(n.left);
+        drawNodes(n.mid);
+        drawNodes(n.right);
+        tt_node(n);
+    }
+
+    connect(ttRoot);
+    drawNodes(ttRoot);
+}
+
+tt_draw();
+</script>

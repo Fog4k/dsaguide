@@ -1,0 +1,153 @@
+@{
+    ViewData["Title"] = "Binary Tree";
+}
+
+<h1>Binary Tree — Visualization</h1>
+
+<p>
+    Бинарное дерево: у каждого узла до двух детей.  
+    Вставка идёт по уровням (level-order). Значения уникальны — дубликаты не добавляются.
+</p>
+
+<div class="visual-box">
+    <input id="bt-val" class="ll-input" placeholder="Value" />
+    <button onclick="bt_insert()">Insert</button>
+    <button onclick="bt_clear()">Clear</button>
+
+    <canvas id="btCanvas" width="1200" height="600"
+            style="margin-top:20px; background:#0d1117; border-radius:12px; border:1px solid #333;"></canvas>
+</div>
+
+<script>
+class BTNode {
+    constructor(v){
+        this.value = v;
+        this.left = null;
+        this.right = null;
+        this.x = 0;
+        this.y = 0;
+    }
+}
+
+let btRoot = null;
+
+function bt_exists(node, v){
+    if(!node) return false;
+    if(node.value === v) return true;
+    return bt_exists(node.left, v) || bt_exists(node.right, v);
+}
+
+// level-order вставка
+function bt_insertNode(root, v){
+    const q = [root];
+    while(q.length){
+        const n = q.shift();
+        if(!n.left){
+            n.left = new BTNode(v);
+            return;
+        }
+        if(!n.right){
+            n.right = new BTNode(v);
+            return;
+        }
+        q.push(n.left, n.right);
+    }
+}
+
+function bt_insert(){
+    let val = Number(document.getElementById("bt-val").value.trim());
+    if(isNaN(val)) return alert("Введите число");
+
+    if(!btRoot){
+        btRoot = new BTNode(val);
+    } else {
+        if(bt_exists(btRoot, val)) return alert("Такое значение уже есть");
+        bt_insertNode(btRoot, val);
+    }
+    bt_draw();
+}
+
+function bt_clear(){
+    btRoot = null;
+    bt_draw();
+}
+
+// ==== CANVAS ====
+const btCanvas = document.getElementById("btCanvas");
+const btCtx = btCanvas.getContext("2d");
+
+function bt_layout(root){
+    const levels = [];
+    function dfs(node, depth){
+        if(!node) return;
+        if(!levels[depth]) levels[depth] = [];
+        levels[depth].push(node);
+        dfs(node.left, depth+1);
+        dfs(node.right, depth+1);
+    }
+    dfs(root, 0);
+
+    const W = btCanvas.width;
+    const levelH = 100;
+
+    levels.forEach((arr, depth)=>{
+        const gap = W / (arr.length + 1);
+        arr.forEach((node, i)=>{
+            node.x = gap * (i+1);
+            node.y = 80 + depth * levelH;
+        });
+    });
+}
+
+function bt_drawLine(a,b){
+    btCtx.beginPath();
+    btCtx.moveTo(a.x, a.y);
+    btCtx.lineTo(b.x, b.y);
+    btCtx.strokeStyle = "#4b5563";
+    btCtx.lineWidth = 2;
+    btCtx.stroke();
+}
+
+function bt_drawNode(n){
+    btCtx.beginPath();
+    btCtx.arc(n.x, n.y, 22, 0, Math.PI*2);
+    btCtx.fillStyle = "#111827";
+    btCtx.fill();
+    btCtx.strokeStyle = "#38bdf8";
+    btCtx.lineWidth = 2;
+    btCtx.stroke();
+
+    btCtx.fillStyle = "#e5e7eb";
+    btCtx.font = "14px Inter";
+    btCtx.textAlign = "center";
+    btCtx.textBaseline = "middle";
+    btCtx.fillText(n.value, n.x, n.y);
+}
+
+function bt_draw(){
+    btCtx.clearRect(0,0,btCanvas.width,btCanvas.height);
+    if(!btRoot) return;
+
+    bt_layout(btRoot);
+
+    function connect(n){
+        if(!n) return;
+        if(n.left) bt_drawLine(n, n.left);
+        if(n.right) bt_drawLine(n, n.right);
+        connect(n.left);
+        connect(n.right);
+    }
+
+    function drawNodes(n){
+        if(!n) return;
+        drawNodes(n.left);
+        drawNodes(n.right);
+        bt_drawNode(n);
+    }
+
+    connect(btRoot);
+    drawNodes(btRoot);
+}
+
+bt_draw();
+</script>

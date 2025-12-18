@@ -1,0 +1,102 @@
+@{
+    ViewData["Title"] = "Searching Algorithms";
+}
+
+<h1>Searching Algorithms — Visualization</h1>
+
+<p>
+    Поддерживаются:
+</p>
+<ul>
+    <li><strong>Linear Search</strong> — O(n)</li>
+    <li><strong>Binary Search</strong> — O(log n), только для отсортированного массива</li>
+</ul>
+
+<div class="visual-box">
+
+    <button onclick="search_generate()">Generate Array</button>
+    <input id="search-target" class="ll-input" placeholder="Target" />
+    <button onclick="search_linear()">Linear Search</button>
+    <button onclick="search_binary()">Binary Search</button>
+
+    <div id="search-canvas" style="margin-top:20px;"></div>
+</div>
+
+<style>
+.s-box {
+    display:inline-block;
+    padding:10px 14px;
+    margin:5px;
+    background:#1e232d;
+    border:1px solid #3a3f4b;
+    border-radius:6px;
+}
+.s-act { background:#264a7f !important; border-color:#58a6ff !important; }
+.s-found { background:#2ea043 !important; }
+</style>
+
+<script>
+let sArr=[];
+
+function s_render(active=null,found=null){
+    let c=document.getElementById("search-canvas");
+    c.innerHTML="";
+    sArr.forEach((v,i)=>{
+        let box=document.createElement("span");
+        box.className="s-box";
+        if(i===active) box.classList.add("s-act");
+        if(i===found) box.classList.add("s-found");
+        box.innerText=v;
+        c.appendChild(box);
+    });
+}
+
+function search_generate(){
+    sArr=[];
+    for(let i=0;i<12;i++) sArr.push(Math.floor(Math.random()*40));
+    sArr.sort((a,b)=>a-b);
+    s_render();
+}
+
+async function search_linear(){
+    let t=document.getElementById("search-target").value.trim();
+    if(t==="") return alert("Enter target");
+    t=Number(t);
+
+    for(let i=0;i<sArr.length;i++){
+        s_render(i,null);
+        await new Promise(r=>setTimeout(r,200));
+        if(sArr[i]===t){
+            s_render(null,i);
+            return;
+        }
+    }
+
+    alert("Not found");
+}
+
+async function search_binary(){
+    let t=document.getElementById("search-target").value.trim();
+    if(t==="") return alert("Enter target");
+    t=Number(t);
+
+    let l=0,r=sArr.length-1;
+
+    while(l<=r){
+        let m=Math.floor((l+r)/2);
+        s_render(m,null);
+        await new Promise(r=>setTimeout(r,250));
+
+        if(sArr[m]===t){
+            s_render(null,m);
+            return;
+        }
+        if(sArr[m]<t) l=m+1;
+        else r=m-1;
+    }
+
+    alert("Not found");
+}
+
+search_generate();
+</script>

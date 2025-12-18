@@ -1,0 +1,280 @@
+@{
+    ViewData["Title"] = "Dijkstra Algorithm";
+}
+
+<h1>Dijkstra — Visualization (Min-Heap)</h1>
+
+<p>
+    Сначала построй граф: кликай по холсту, чтобы добавить вершины. <br />
+    Клик по вершине A → клик по вершине B → ввод веса (неотрицательного) создаёт ребро A–B. <br />
+    Введите ID исходной вершины и запустите алгоритм.
+</p>
+
+<div class="visual-box">
+
+    <button onclick="dj_addNode()">Add Node</button>
+    <button onclick="dj_run()">Run Dijkstra</button>
+    <button onclick="dj_clear()">Clear</button>
+
+    <input id="dj-source" class="ll-input" placeholder="Source ID (e.g. 0)" />
+
+    <canvas id="dj-canvas" width="900" height="520"
+        style="background:#020617; border:1px solid #333; margin-top:20px; border-radius:10px;"></canvas>
+
+    <h3>Distances & Priority Queue</h3>
+    <pre id="dj-dist" style="background:#020617;padding:10px;border-radius:8px;"></pre>
+</div>
+
+<script>
+// ==== DATA STRUCTURES ====
+let dj_nodes = [];   // {id,x,y}
+let dj_edges = [];   // {from, to, w}  (undirected, храним один раз)
+let dj_sel   = null; // выбранная вершина для создания ребра
+
+let dj_state = {
+    dist: {},
+    prev: {},
+    visited: {},
+    current: null,
+    source: null,
+    queue: []
+};
+
+const djc   = document.getElementById("dj-canvas");
+const djctx = djc.getContext("2d");
+
+// ==== INTERACTION: BUILD GRAPH ====
+djc.addEventListener("click", dj_click);
+
+function dj_getPos(e){
+    const r = djc.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+
+function dj_findNode(x,y){
+    return dj_nodes.find(n => Math.hypot(n.x - x, n.y - y) < 20) || null;
+}
+
+function dj_click(e){
+    const {x,y} = dj_getPos(e);
+    const hit = dj_findNode(x,y);
+
+    if (hit) {
+        // режим соединения вершин
+        if (dj_sel === null) {
+            dj_sel = hit;
+        } else if (dj_sel !== hit) {
+            let w = prompt("Weight (>= 0):");
+            if (w === null) { dj_sel = null; dj_render(); return; }
+            w = Number(w);
+            if (isNaN(w) || w < 0) {
+                alert("Нужен неотрицательный вес");
+                dj_sel = null;
+                dj_render();
+                return;
+            }
+
+            // проверяем, есть ли уже ребро (undirected)
+            const exists = dj_edges.some(e =>
+                (e.from === dj_sel.id && e.to === hit.id) ||
+                (e.from === hit.id && e.to === dj_sel.id)
+            );
+            if (!exists) {
+                dj_edges.push({from: dj_sel.id, to: hit.id, w});
+            } else {
+                // если ребро уже есть — обновим его вес
+                dj_edges = dj_edges.map(e => {
+                    if ((e.from === dj_sel.id && e.to === hit.id) ||
+                        (e.from === hit.id && e.to === dj_sel.id)) {
+                        return {from: e.from, to: e.to, w};
+                    }
+                    return e;
+                });
+            }
+            dj_sel = null;
+        }
+    } else {
+        // новая вершина
+        dj_nodes.push({ id: dj_nodes.length, x, y });
+    }
+
+    dj_render();
+}
+
+function dj_addNode(){
+    dj_nodes.push({
+        id: dj_nodes.length,
+        x: 100 + Math.random()*700,
+        y: 80  + Math.random()*350
+    });
+    dj_render();
+}
+
+function dj_clear(){
+    dj_nodes = [];
+    dj_edges = [];
+    dj_sel   = null;
+    dj_state = { dist:{}, prev:{}, visited:{}, current:null, source:null, queue:[] };
+    document.getElementById("dj-dist").innerText = "";
+    dj_render();
+}
+
+// ==== RENDER ====
+function dj_render(){
+    djctx.clearRect(0,0,djc.width,djc.height);
+
+    // рёбра
+    djctx.lineWidth = 2;
+    for (const e of dj_edges) {
+        const a = dj_nodes.find(n => n.id === e.from);
+        const b = dj_nodes.find(n => n.id === e.to);
+        if (!a || !b) continue;
+
+        // подсветка кратчайшего пути (если prev совпадает)
+        const isOnShortest =
+            (dj_state.prev[b.id] === a.id && dj_state.visited[b.id]) ||
+            (dj_state.prev[a.id] === b.id && dj_state.visited[a.id]);
+
+        djctx.beginPath();
+        djctx.moveTo(a.x, a.y);
+        djctx.lineTo(b.x, b.y);
+        djctx.strokeStyle = isOnShortest ? "#22c55e" : "#4b5563";
+        djctx.stroke();
+
+        // вес
+        const mx = (a.x + b.x)/2;
+        const my = (a.y + b.y)/2;
+        djctx.fillStyle = "#e5e7eb";
+        djctx.font = "11px Inter";
+        djctx.textAlign = "center";
+        djctx.textBaseline = "middle";
+        djctx.fillText(e.w, mx, my - 10);
+    }
+
+    // вершины
+    for (const n of dj_nodes) {
+        djctx.beginPath();
+
+        let fill = "#3b82f6"; // default
+        if (n.id === dj_state.source) fill = "#16a34a";                // source
+        if (dj_state.visited[n.id]) fill = "#15803d";                  // visited
+        if (n.id === dj_state.current) fill = "#f97316";               // current
+        if (dj_sel && dj_sel.id === n.id) fill = "#eab308";            // selected for edge
+
+        djctx.arc(n.x, n.y, 18, 0, Math.PI*2);
+        djctx.fillStyle = fill;
+        djctx.fill();
+
+        djctx.lineWidth = 2;
+        djctx.strokeStyle = "#93c5fd";
+        djctx.stroke();
+
+        djctx.fillStyle = "white";
+        djctx.font = "13px Inter";
+        djctx.textAlign = "center";
+        djctx.textBaseline = "middle";
+        djctx.fillText(n.id, n.x, n.y);
+    }
+}
+
+// ==== DIJKSTRA ====
+function dj_buildAdj(){
+    const adj = {};
+    for (const n of dj_nodes) adj[n.id] = [];
+    for (const e of dj_edges) {
+        adj[e.from].push({to: e.to, w: e.w});
+        adj[e.to].push({to: e.from, w: e.w}); // неориентированный
+    }
+    return adj;
+}
+
+function dj_updatePanel(){
+    const distStr = JSON.stringify(dj_state.dist, null, 2);
+    const prevStr = JSON.stringify(dj_state.prev, null, 2);
+    const visitedStr = JSON.stringify(dj_state.visited, null, 2);
+    const queueStr = JSON.stringify(dj_state.queue, null, 2);
+
+    document.getElementById("dj-dist").innerText =
+        `Source: ${dj_state.source}\nCurrent: ${dj_state.current}\n\n` +
+        `Distances:\n${distStr}\n\n` +
+        `Prev:\n${prevStr}\n\n` +
+        `Visited:\n${visitedStr}\n\n` +
+        `Priority queue [dist, node]:\n${queueStr}`;
+}
+
+async function dj_run(){
+    if (dj_nodes.length === 0) {
+        alert("Сначала добавь вершины");
+        return;
+    }
+    const srcInput = document.getElementById("dj-source").value.trim();
+    if (srcInput === "") {
+        alert("Укажи ID исходной вершины (source)");
+        return;
+    }
+    const s = Number(srcInput);
+    if (isNaN(s) || !dj_nodes.some(n => n.id === s)) {
+        alert("Такой вершины не существует");
+        return;
+    }
+
+    const adj = dj_buildAdj();
+
+    // init
+    dj_state.dist = {};
+    dj_state.prev = {};
+    dj_state.visited = {};
+    dj_state.queue = [];
+    dj_state.source = s;
+    dj_state.current = null;
+
+    for (const n of dj_nodes) {
+        dj_state.dist[n.id] = Infinity;
+        dj_state.prev[n.id] = null;
+        dj_state.visited[n.id] = false;
+    }
+    dj_state.dist[s] = 0;
+    dj_state.queue.push([0, s]);
+
+    function push(d, node){
+        dj_state.queue.push([d, node]);
+        dj_state.queue.sort((a,b) => a[0] - b[0]); // простая имитация min-heap
+    }
+
+    while (dj_state.queue.length > 0) {
+        const [curDist, u] = dj_state.queue.shift();
+        if (dj_state.visited[u]) continue;
+
+        dj_state.current = u;
+        dj_render();
+        dj_updatePanel();
+        await new Promise(r => setTimeout(r, 700)); // пауза между шагами
+
+        dj_state.visited[u] = true;
+
+        for (const edge of adj[u]) {
+            const v = edge.to;
+            const w = edge.w;
+            if (dj_state.visited[v]) continue;
+
+            const newDist = dj_state.dist[u] + w;
+            if (newDist < dj_state.dist[v]) {
+                dj_state.dist[v] = newDist;
+                dj_state.prev[v] = u;
+                push(newDist, v);
+            }
+
+            dj_render();
+            dj_updatePanel();
+            await new Promise(r => setTimeout(r, 500));
+        }
+    }
+
+    dj_state.current = null;
+    dj_render();
+    dj_updatePanel();
+    alert("Dijkstra completed — зелёные рёбра показывают кратчайшие пути.");
+}
+
+dj_render();
+</script>

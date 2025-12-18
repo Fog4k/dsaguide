@@ -1,0 +1,136 @@
+@{
+    ViewData["Title"] = "Directed Graph";
+}
+
+<h1>Directed Graph — Visualization</h1>
+
+<p>
+    Click → add nodes.  
+    Click node A → затем click node B → создаётся directed edge A → B.
+</p>
+
+<div class="visual-box">
+    <button onclick="dg_clear()">Clear</button>
+
+    <h3 style="margin-top:15px;">Adjacency List</h3>
+    <pre id="dg-list" style="background:#111;padding:10px;border-radius:6px;"></pre>
+
+    <canvas id="dg-canvas" width="800" height="500"
+            style="margin-top:20px; background:#0d1117; border:1px solid #333; border-radius:8px;"></canvas>
+</div>
+
+<script>
+let dg_nodes = [];
+let dg_edges = []; // элементы вида [fromNode, toNode]
+let dg_sel = null;
+
+const dgc = document.getElementById("dg-canvas");
+const dctx = dgc.getContext("2d");
+
+dgc.addEventListener("click", dg_click);
+
+function dg_click(e) {
+    const r = dgc.getBoundingClientRect();
+    const x = e.clientX - r.left;
+    const y = e.clientY - r.top;
+
+    const hit = dg_findNode(x, y);
+
+    if (hit) {
+        if (dg_sel === null) {
+            // выбираем первую вершину
+            dg_sel = hit;
+        } else if (dg_sel !== hit) {
+            // создаём ориентированное ребро A -> B, если его ещё нет
+            const exists = dg_edges.some(edge =>
+                edge[0] === dg_sel && edge[1] === hit
+            );
+            if (!exists) {
+                dg_edges.push([dg_sel, hit]);
+            }
+            dg_sel = null;
+        }
+    } else {
+        // создаём новую вершину
+        dg_nodes.push({ x, y, id: dg_nodes.length });
+    }
+
+    dg_draw();
+}
+
+function dg_findNode(x, y) {
+    return dg_nodes.find(n => Math.hypot(n.x - x, n.y - y) < 20) || null;
+}
+
+function dg_drawArrow(a, b) {
+    const headlen = 10;
+    const angle = Math.atan2(b.y - a.y, b.x - a.x);
+
+    // основная линия
+    dctx.beginPath();
+    dctx.moveTo(a.x, a.y);
+    dctx.lineTo(b.x, b.y);
+    dctx.strokeStyle = "#aaa";
+    dctx.lineWidth = 2;
+    dctx.stroke();
+
+    // наконечник
+    dctx.beginPath();
+    dctx.moveTo(b.x, b.y);
+    dctx.lineTo(
+        b.x - headlen * Math.cos(angle - Math.PI / 6),
+        b.y - headlen * Math.sin(angle - Math.PI / 6)
+    );
+    dctx.lineTo(
+        b.x - headlen * Math.cos(angle + Math.PI / 6),
+        b.y - headlen * Math.sin(angle + Math.PI / 6)
+    );
+    dctx.closePath();
+    dctx.fillStyle = "#aaa";
+    dctx.fill();
+}
+
+function dg_renderNodes() {
+    for (let n of dg_nodes) {
+        dctx.beginPath();
+        dctx.fillStyle = (n === dg_sel ? "#ffd966" : "#58a6ff");
+        dctx.arc(n.x, n.y, 18, 0, Math.PI * 2);
+        dctx.fill();
+
+        dctx.fillStyle = "black";
+        dctx.font = "12px sans-serif";
+        dctx.fillText(n.id, n.x - 4, n.y + 4);
+    }
+}
+
+function dg_updateList() {
+    const adj = {};
+    for (let n of dg_nodes) adj[n.id] = [];
+    for (let [from, to] of dg_edges) {
+        adj[from.id].push(to.id);
+    }
+    document.getElementById("dg-list").innerText = JSON.stringify(adj, null, 2);
+}
+
+function dg_draw() {
+    dctx.clearRect(0, 0, dgc.width, dgc.height);
+
+    // рёбра
+    for (let [a, b] of dg_edges) {
+        dg_drawArrow(a, b);
+    }
+
+    // вершины
+    dg_renderNodes();
+    dg_updateList();
+}
+
+function dg_clear() {
+    dg_nodes = [];
+    dg_edges = [];
+    dg_sel = null;
+    dg_draw();
+}
+
+dg_draw();
+</script>

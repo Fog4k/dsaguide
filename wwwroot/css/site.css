@@ -1,0 +1,220 @@
+body {
+    margin: 0;
+    background: #0d1117;
+    color: #e2e2e2;
+    font-family: 'Inter', sans-serif;
+}
+
+/* NAVBAR */
+.navbar {
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+    padding: 14px 0;
+}
+
+.nav-container {
+    width: 92%;
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-weight: 700;
+    font-size: 20px;
+    color: #58a6ff;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 24px;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #e2e2e2;
+    font-weight: 500;
+}
+
+.nav-links a:hover {
+    color: #58a6ff;
+}
+
+/* PAGE CONTAINER */
+.container {
+    width: 92%;
+    max-width: 1200px;
+    margin: auto;
+    padding: 40px 0;
+}
+
+/* CARDS GRID */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 25px;
+    margin-top: 40px;
+}
+
+.card {
+    background: #161b22;
+    padding: 24px;
+    border-radius: 10px;
+    border: 1px solid #30363d;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.card:hover {
+    border-color: #58a6ff;
+    transform: translateY(-5px);
+}
+
+.card h3 {
+    margin-top: 0;
+    color: #58a6ff;
+}
+
+/* VISUALIZATION BLOCK */
+.visual-box {
+    background: #161b22;
+    border: 1px solid #30363d;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+/* SEARCH BOX */
+.search-box {
+    display: flex;
+    width: 60%;
+    margin: 30px auto;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 14px;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    color: white;
+    outline: none;
+}
+
+.search-box button {
+    padding: 14px 25px;
+    background: #238636;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.search-box button:hover {
+    background: #2ea043;
+}
+
+.dashboard-hero {
+    display: flex;
+    justify-content: space-between;
+    gap: 26px;
+    align-items: center;
+    margin-bottom: 26px;
+}
+
+.hero-main {
+    flex: 1.4;
+}
+
+.hero-side {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.hero-tags {
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.hero-tag {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(148,163,184,0.5);
+    background: radial-gradient(circle at 0 0, rgba(56,189,248,0.2), transparent);
+}
+
+/* Орбита */
+.hero-orbit {
+    width: 180px;
+    height: 180px;
+    border-radius: 999px;
+    border: 1px dashed rgba(148,163,184,0.4);
+    position: relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    animation: orbit-rotate 30s linear infinite;
+}
+
+.hero-orbit .orbit-core {
+    width: 70px;
+    height: 70px;
+    border-radius: 22px;
+    background: radial-gradient(circle at 0 0, #38bdf8, #4f46e5);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    font-size:14px;
+    color:#0b1120;
+    box-shadow: 0 16px 40px rgba(37,99,235,0.8);
+}
+
+.orbit-dot {
+    width: 10px;
+    height: 10px;
+    border-radius:999px;
+    position:absolute;
+    background:#38bdf8;
+}
+
+.orbit-dot-1 { top: 6px; left: 50%; transform:translateX(-50%); }
+.orbit-dot-2 { right: 8px; top: 50%; transform:translateY(-50%); background:#22c55e; }
+.orbit-dot-3 { bottom: 8px; left: 18%; background:#eab308; }
+
+.hero-note {
+    font-size: 11px;
+    color: #9ca3af;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(148,163,184,0.4);
+    background: rgba(15,23,42,0.9);
+}
+
+.dashboard-section {
+    margin-top: 28px;
+}
+
+/* Pulse для найденной карточки */
+.card-pulse {
+    animation: cardPulse 0.8s ease;
+}
+
+@keyframes cardPulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 rgba(96,165,250,0.8); }
+    50% { transform: scale(1.03); box-shadow: 0 0 30px rgba(96,165,250,0.9); }
+    100% { transform: scale(1); box-shadow: 0 0 0 rgba(96,165,250,0.0); }
+}
+
+@keyframes orbit-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}

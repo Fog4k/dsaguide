@@ -1,0 +1,87 @@
+@{
+    ViewData["Title"] = "Stack Visualizer";
+}
+
+<h1>Stack (LIFO) — Visualization</h1>
+
+<p>
+    Stack (стек) работает по принципу <strong>Last In — First Out</strong>.
+    <br/>Основные операции:
+</p>
+<ul>
+    <li><strong>push(x)</strong> — добавить наверх</li>
+    <li><strong>pop()</strong> — снять самый верхний</li>
+</ul>
+
+<div class="visual-box">
+
+    <input id="stack-val" class="ll-input" placeholder="Value" />
+    <button onclick="s_push()">Push</button>
+    <button onclick="s_pop()">Pop</button>
+    <button onclick="s_clear()">Clear</button>
+
+    <div style="margin-top:25px;" id="stack-canvas"></div>
+</div>
+
+<style>
+.s-item {
+    width:120px;
+    padding:10px;
+    margin:5px auto;
+    background:#1e232d;
+    border:1px solid #3a3f4b;
+    border-radius:6px;
+    color:white;
+    text-align:center;
+    position:relative;
+}
+.s-top::after {
+    content:"TOP";
+    position:absolute;
+    right:-40px;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:11px;
+    color:#58a6ff;
+}
+</style>
+
+<script>
+let stack=[];
+
+function s_render(){
+    let c=document.getElementById("stack-canvas");
+    c.innerHTML="";
+
+    if(stack.length===0){
+        c.innerHTML="<p style='color:#777'>Stack is empty</p>";
+        return;
+    }
+
+    // Render vertically — top is last
+    for(let i=stack.length-1; i>=0; i--){
+        let el=document.createElement("div");
+        el.className="s-item";
+        if(i===stack.length-1) el.classList.add("s-top");
+        el.innerText=stack[i];
+        c.appendChild(el);
+    }
+}
+
+function s_push(){
+    let v=document.getElementById("stack-val").value.trim();
+    if(!v) return;
+    stack.push(v);
+    s_render();
+}
+
+function s_pop(){
+    if(stack.length===0) return alert("Stack empty");
+    stack.pop();
+    s_render();
+}
+
+function s_clear(){ stack=[]; s_render(); }
+
+s_render();
+</script>

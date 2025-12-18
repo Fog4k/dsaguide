@@ -1,0 +1,98 @@
+@{
+    ViewData["Title"] = "Queue Visualizer";
+}
+
+<h1>Queue (FIFO) — Visualization</h1>
+
+<p>
+    Queue (очередь) работает по принципу <strong>First In — First Out</strong>.
+    <br/>Основные операции:
+</p>
+<ul>
+    <li><strong>enqueue(x)</strong> — вставка в конец</li>
+    <li><strong>dequeue()</strong> — удаление из начала</li>
+</ul>
+
+<div class="visual-box">
+
+    <input id="queue-val" class="ll-input" placeholder="Value" />
+    <button onclick="q_enqueue()">Enqueue</button>
+    <button onclick="q_dequeue()">Dequeue</button>
+    <button onclick="q_clear()">Clear</button>
+
+    <div style="margin-top:25px;" id="queue-canvas"></div>
+</div>
+
+<style>
+.q-box {
+    display:inline-block;
+    padding:12px 16px;
+    margin:5px;
+    background:#1e232d;
+    border:1px solid #3a3f4b;
+    border-radius:6px;
+    color:white;
+    font-weight:600;
+    position:relative;
+}
+.q-head::after {
+    content:"HEAD";
+    position:absolute;
+    top:-22px;
+    left:50%;
+    transform:translateX(-50%);
+    color:#58a6ff;
+    font-size:11px;
+}
+.q-tail::after {
+    content:"TAIL";
+    position:absolute;
+    bottom:-22px;
+    left:50%;
+    transform:translateX(-50%);
+    color:#58a6ff;
+    font-size:11px;
+}
+</style>
+
+<script>
+let queue=[];
+
+function q_render(){
+    let c=document.getElementById("queue-canvas");
+    c.innerHTML="";
+
+    if(queue.length===0){
+        c.innerHTML="<p style='color:#777'>Queue is empty</p>";
+        return;
+    }
+
+    queue.forEach((v,i)=>{
+        let el=document.createElement("div");
+        el.className="q-box";
+        el.innerText=v;
+
+        if(i===0) el.classList.add("q-head");
+        if(i===queue.length-1) el.classList.add("q-tail");
+
+        c.appendChild(el);
+    });
+}
+
+function q_enqueue(){
+    let v=document.getElementById("queue-val").value.trim();
+    if(!v) return;
+    queue.push(v);
+    q_render();
+}
+
+function q_dequeue(){
+    if(queue.length===0) return alert("Queue empty");
+    queue.shift();
+    q_render();
+}
+
+function q_clear(){ queue=[]; q_render(); }
+
+q_render();
+</script>

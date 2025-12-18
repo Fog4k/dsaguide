@@ -1,0 +1,169 @@
+@{
+    ViewData["Title"] = "Sorting Algorithms";
+}
+
+<h1>Sorting Algorithms — Visualization</h1>
+
+<p>
+    Поддерживаются 5 алгоритмов сортировки:
+</p>
+<ul>
+    <li>Bubble Sort — O(n²)</li>
+    <li>Selection Sort — O(n²)</li>
+    <li>Insertion Sort — O(n²)</li>
+    <li>Quick Sort — O(n log n)</li>
+    <li>Merge Sort — O(n log n)</li>
+</ul>
+
+<div class="visual-box">
+
+    <button onclick="sort_generate()">Generate Random</button>
+    <button onclick="sort_bubble()">Bubble</button>
+    <button onclick="sort_selection()">Selection</button>
+    <button onclick="sort_insertion()">Insertion</button>
+    <button onclick="sort_quick_start()">QuickSort</button>
+    <button onclick="sort_merge_start()">MergeSort</button>
+
+    <div id="sort-canvas" style="margin-top:20px; height:200px; display:flex; align-items:flex-end;"></div>
+</div>
+
+<style>
+.sort-bar {
+    width:30px;
+    margin:2px;
+    background:#58a6ff;
+    border-radius:4px 4px 0 0;
+}
+.sort-bar.active { background:#ff7b7b; }
+.sort-bar.swap { background:#ffd966; }
+</style>
+
+<script>
+let sortArr=[];
+
+function sort_render(highA=null, highB=null){
+    let c=document.getElementById("sort-canvas");
+    c.innerHTML="";
+
+    sortArr.forEach((v,i)=>{
+        let bar=document.createElement("div");
+        bar.className="sort-bar";
+        if(i===highA||i===highB) bar.classList.add("active");
+
+        bar.style.height = (v*3+10) + "px";
+        c.appendChild(bar);
+    });
+}
+
+function sort_generate(){
+    sortArr=[];
+    for(let i=0;i<20;i++) sortArr.push(Math.floor(Math.random()*50)+5);
+    sort_render();
+}
+
+async function bubbleStep(i,j){
+    sort_render(i,j);
+    await new Promise(r=>setTimeout(r,80));
+}
+
+async function sort_bubble(){
+    let n=sortArr.length;
+    for(let i=0;i<n;i++){
+        for(let j=0;j<n-i-1;j++){
+            await bubbleStep(j,j+1);
+            if(sortArr[j]>sortArr[j+1]){
+                [sortArr[j],sortArr[j+1]]=[sortArr[j+1],sortArr[j]];
+                sort_render(j,j+1);
+            }
+        }
+    }
+}
+
+async function sort_selection(){
+    let n=sortArr.length;
+    for(let i=0;i<n;i++){
+        let min=i;
+        for(let j=i+1;j<n;j++){
+            sort_render(min,j);
+            await new Promise(r=>setTimeout(r,80));
+            if(sortArr[j]<sortArr[min]) min=j;
+        }
+        [sortArr[i],sortArr[min]]=[sortArr[min],sortArr[i]];
+        sort_render();
+    }
+}
+
+async function sort_insertion(){
+    for(let i=1;i<sortArr.length;i++){
+        let key=sortArr[i];
+        let j=i-1;
+
+        while(j>=0 && sortArr[j]>key){
+            sortArr[j+1]=sortArr[j];
+            sort_render(j,j+1);
+            await new Promise(r=>setTimeout(r,80));
+            j--;
+        }
+        sortArr[j+1]=key;
+        sort_render();
+    }
+}
+
+async function quickSort(l,r){
+    if(l>=r) return;
+
+    let pivot=sortArr[Math.floor((l+r)/2)];
+    let i=l,j=r;
+
+    while(i<=j){
+        while(sortArr[i]<pivot) i++;
+        while(sortArr[j]>pivot) j--;
+
+        sort_render(i,j);
+        await new Promise(r=>setTimeout(r,80));
+
+        if(i<=j){
+            [sortArr[i],sortArr[j]]=[sortArr[j],sortArr[i]];
+            i++; j--;
+        }
+    }
+
+    await quickSort(l,j);
+    await quickSort(i,r);
+}
+
+async function sort_quick_start(){
+    await quickSort(0,sortArr.length-1);
+    sort_render();
+}
+
+function merge(arr,l,m,r){
+    let L=arr.slice(l,m+1);
+    let R=arr.slice(m+1,r+1);
+    let i=0,j=0,k=l;
+
+    while(i<L.length && j<R.length){
+        if(L[i]<=R[j]) arr[k++]=L[i++];
+        else arr[k++]=R[j++];
+    }
+
+    while(i<L.length) arr[k++]=L[i++];
+    while(j<R.length) arr[k++]=R[j++];
+}
+
+async function mergeSort(l,r){
+    if(l>=r) return;
+    let m=Math.floor((l+r)/2);
+    await mergeSort(l,m);
+    await mergeSort(m+1,r);
+    merge(sortArr,l,m,r);
+    sort_render();
+    await new Promise(r=>setTimeout(r,80));
+}
+
+async function sort_merge_start(){
+    await mergeSort(0,sortArr.length-1);
+}
+</script>
+
+<script>sort_generate();</script>

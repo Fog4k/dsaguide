@@ -1,0 +1,189 @@
+@{
+    ViewData["Title"] = "Heap (Min/Max)";
+}
+
+<h1>Heap (Min/Max) — Tree & Array Visualization</h1>
+
+<p>
+    Двоичная куча хранится в массиве.  
+    Здесь видно и дерево, и внутренний массив. Можно переключаться между Min и Max heap.
+</p>
+
+<div class="visual-box">
+    <select id="heap-type" class="ll-input" onchange="heap_resetType()">
+        <option value="min">Min Heap</option>
+        <option value="max">Max Heap</option>
+    </select>
+
+    <input id="heap-val" class="ll-input" placeholder="Value" />
+    <button onclick="heap_insert()">Insert</button>
+    <button onclick="heap_extract()">Extract Root</button>
+    <button onclick="heap_random()">Random Fill</button>
+    <button onclick="heap_clear()">Clear</button>
+
+    <canvas id="heapCanvas" width="1200" height="500"
+            style="margin-top:20px; background:#0d1117; border-radius:12px; border:1px solid #333;"></canvas>
+
+    <h3 style="margin-top:10px;">Array representation</h3>
+    <pre id="heap-array" style="background:#111; padding:8px; border-radius:8px;"></pre>
+</div>
+
+<script>
+let heap = [];
+let isMinHeap = true;
+
+const hCanvas = document.getElementById("heapCanvas");
+const hCtx = hCanvas.getContext("2d");
+
+function heap_cmp(a,b){
+    return isMinHeap ? a < b : a > b;
+}
+
+function heap_swap(i,j){
+    [heap[i], heap[j]] = [heap[j], heap[i]];
+}
+
+function heap_bubbleUp(idx){
+    while(idx > 0){
+        let parent = Math.floor((idx - 1) / 2);
+        if(heap_cmp(heap[idx], heap[parent])){
+            heap_swap(idx, parent);
+            idx = parent;
+        } else break;
+    }
+}
+
+function heap_bubbleDown(idx){
+    const n = heap.length;
+    while(true){
+        let left = 2*idx + 1;
+        let right = 2*idx + 2;
+        let best = idx;
+
+        if(left < n && heap_cmp(heap[left], heap[best])) best = left;
+        if(right < n && heap_cmp(heap[right], heap[best])) best = right;
+
+        if(best !== idx){
+            heap_swap(idx, best);
+            idx = best;
+        } else break;
+    }
+}
+
+function heap_insert(){
+    let v = Number(document.getElementById("heap-val").value.trim());
+    if(isNaN(v)) return alert("Введите число");
+    heap.push(v);
+    heap_bubbleUp(heap.length - 1);
+    heap_draw();
+}
+
+function heap_extract(){
+    if(heap.length === 0) return;
+    const root = heap[0];
+    heap[0] = heap[heap.length - 1];
+    heap.pop();
+    heap_bubbleDown(0);
+    heap_draw();
+    alert("Extracted root: " + root);
+}
+
+function heap_random(){
+    heap = [];
+    for(let i=0;i<10;i++){
+        heap.push(Math.floor(Math.random()*100));
+    }
+    // построить кучу из массива
+    for(let i=Math.floor(heap.length/2); i>=0; i--){
+        heap_bubbleDown(i);
+    }
+    heap_draw();
+}
+
+function heap_clear(){
+    heap = [];
+    heap_draw();
+}
+
+function heap_resetType(){
+    isMinHeap = document.getElementById("heap-type").value === "min";
+    // перестроим кучу по текущему массиву
+    for(let i=Math.floor(heap.length/2); i>=0; i--){
+        heap_bubbleDown(i);
+    }
+    heap_draw();
+}
+
+// ==== layout & draw ====
+function heap_layout(){
+    const nodes = [];
+    const W = hCanvas.width;
+    const levelH = 90;
+
+    for(let i=0;i<heap.length;i++){
+        const depth = Math.floor(Math.log2(i+1));
+        const firstIndexAtDepth = Math.pow(2, depth) - 1;
+        const indexInLevel = i - firstIndexAtDepth;
+        const countAtDepth = Math.pow(2, depth);
+
+        const gap = W / (countAtDepth + 1);
+        const x = gap * (indexInLevel + 1);
+        const y = 70 + depth * levelH;
+
+        nodes.push({i, x, y, value: heap[i]});
+    }
+    return nodes;
+}
+
+function heap_draw(){
+    hCtx.clearRect(0,0,hCanvas.width,hCanvas.height);
+
+    document.getElementById("heap-array").innerText =
+        heap.length === 0 ? "[]" : JSON.stringify(heap);
+
+    if(heap.length === 0) return;
+
+    const nodes = heap_layout();
+
+    // линии
+    hCtx.strokeStyle = "#4b5563";
+    hCtx.lineWidth = 2;
+    nodes.forEach(n => {
+        const left = 2*n.i + 1;
+        const right = 2*n.i + 2;
+        if(left < heap.length){
+            const child = nodes[left];
+            hCtx.beginPath();
+            hCtx.moveTo(n.x, n.y);
+            hCtx.lineTo(child.x, child.y);
+            hCtx.stroke();
+        }
+        if(right < heap.length){
+            const child = nodes[right];
+            hCtx.beginPath();
+            hCtx.moveTo(n.x, n.y);
+            hCtx.lineTo(child.x, child.y);
+            hCtx.stroke();
+        }
+    });
+
+    // узлы
+    nodes.forEach(n => {
+        hCtx.beginPath();
+        hCtx.arc(n.x, n.y, 20, 0, Math.PI*2);
+        hCtx.fillStyle = isMinHeap ? "#166534" : "#1d4ed8";
+        hCtx.fill();
+        hCtx.strokeStyle = "#93c5fd";
+        hCtx.lineWidth = 2;
+        hCtx.stroke();
+
+        hCtx.fillStyle = "white";
+        hCtx.font = "13px Inter";
+        hCtx.textAlign = "center";
+        hCtx.textBaseline = "middle";
+        hCtx.fillText(n.value, n.x, n.y);
+    });
+}
+
+heap_draw();
+</script>

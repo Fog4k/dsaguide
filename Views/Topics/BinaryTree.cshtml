@@ -1,0 +1,93 @@
+@{
+    ViewData["Title"] = "Binary Tree Visualizer";
+}
+
+<h1>Binary Tree — Visualization</h1>
+
+<p>
+    Бинарное дерево: каждый узел имеет 0–2 детей.  
+    Здесь можно вставлять узлы уровнями (level-order insert).
+</p>
+
+<div class="visual-box">
+    <input id="bt-value" class="ll-input" placeholder="Value" />
+    <button onclick="bt_insert()">Insert</button>
+    <button onclick="bt_clear()">Clear</button>
+
+    <div id="bt-canvas" style="margin-top:30px;"></div>
+</div>
+
+<style>
+.tree-node {
+    background:#1e232d;
+    padding:8px 12px;
+    border:1px solid #3a3f4b;
+    border-radius:6px;
+    display:inline-block;
+    margin:5px;
+}
+.tree-children {
+    display:flex;
+    justify-content:center;
+}
+.tree-branch {
+    text-align:center;
+}
+</style>
+
+<script>
+let bt_root=null;
+
+class BTNode {
+    constructor(v){
+        this.value=v;
+        this.left=null;
+        this.right=null;
+    }
+}
+
+function bt_insertNode(root,val){
+    let q=[root];
+    while(q.length){
+        let n=q.shift();
+        if(!n.left){ n.left=new BTNode(val); return; }
+        if(!n.right){ n.right=new BTNode(val); return; }
+        q.push(n.left,n.right);
+    }
+}
+
+function bt_insert(){
+    let v=document.getElementById("bt-value").value.trim();
+    if(!v) return;
+
+    if(!bt_root) bt_root=new BTNode(v);
+    else bt_insertNode(bt_root,v);
+
+    bt_render();
+}
+
+function bt_renderNode(n){
+    if(!n) return "";
+
+    let html = `<div class="tree-branch">
+                    <div class="tree-node">${n.value}</div>`;
+    if(n.left || n.right){
+        html += `<div class="tree-children">`;
+        html += `<div>${bt_renderNode(n.left)}</div>`;
+        html += `<div>${bt_renderNode(n.right)}</div>`;
+        html += `</div>`;
+    }
+    html += `</div>`;
+    return html;
+}
+
+function bt_render(){
+    let c=document.getElementById("bt-canvas");
+    if(!bt_root){ c.innerHTML="<p style='color:#777'>Empty</p>"; return; }
+    c.innerHTML = bt_renderNode(bt_root);
+}
+
+function bt_clear(){ bt_root=null; bt_render(); }
+
+bt_render();
+</script>

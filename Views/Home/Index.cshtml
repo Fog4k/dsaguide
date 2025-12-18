@@ -1,0 +1,218 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<section class="dashboard-hero">
+    <div class="hero-main">
+        <h1>Data Structures & Algorithms Guide</h1>
+        <p>
+            Интерактивный гайд по всем темам курса: структуры данных, сортировки, графы и алгоритмы поиска.
+            Выбирай тему — смотри объяснение и живую визуализацию.
+        </p>
+
+        <div class="search-box">
+            <input id="topicSearch" placeholder="Search topic (array, graph, dijkstra, a*...)" />
+            <button onclick="dashboardSearch()">Search</button>
+        </div>
+
+        <div class="hero-tags">
+            <span class="hero-tag">.NET 8</span>
+            <span class="hero-tag">Interactive Visuals</span>
+            <span class="hero-tag">DSA Course</span>
+        </div>
+    </div>
+
+    <div class="hero-side">
+        <div class="hero-orbit">
+            <div class="orbit-dot orbit-dot-1"></div>
+            <div class="orbit-dot orbit-dot-2"></div>
+            <div class="orbit-dot orbit-dot-3"></div>
+            <div class="orbit-core">DSA</div>
+        </div>
+        <div class="hero-note">
+            🔁 Все структуры: Array, Linked List, Trees, Graphs, Heaps, Queues, Stacks…
+        </div>
+    </div>
+</section>
+
+<section class="dashboard-section">
+    <h2>Core Structures</h2>
+    <p>Базовые кирпичики — начни отсюда.</p>
+    <div class="card-grid">
+        <div class="card topic-card" data-topic="Array" onclick="goTopic('/Topics/Array')">
+            <h3>Array</h3>
+            <p>Индексы, вставка, удаление, сдвиги и визуализация как лента памяти.</p>
+            <div class="card-tag-row">
+                <span class="card-tag">O(1) access</span>
+                <span class="card-tag">O(n) insert/delete</span>
+            </div>
+        </div>
+
+        <div class="card topic-card" data-topic="Linked List" onclick="goTopic('/Topics/LinkedList')">
+            <h3>Linked List</h3>
+            <p>Узлы, next-указатели, insert/delete по ссылке, обход списка.</p>
+            <div class="card-tag-row">
+                <span class="card-tag">Singly</span>
+                <span class="card-tag">Pointers</span>
+            </div>
+        </div>
+
+        <div class="card topic-card" data-topic="Doubly Linked List" onclick="goTopic('/Topics/DoublyLinkedList')">
+            <h3>Doubly Linked List</h3>
+            <p>prev / next указатели, удаление из середины за O(1).</p>
+            <div class="card-tag-row">
+                <span class="card-tag">Bidirectional</span>
+            </div>
+        </div>
+
+        <div class="card topic-card" data-topic="Stack" onclick="goTopic('/Topics/Stack')">
+            <h3>Stack</h3>
+            <p>LIFO — вызовы функций, undo/redo, стеки браузера.</p>
+            <div class="card-tag-row">
+                <span class="card-tag">push/pop</span>
+                <span class="card-tag">Recursion</span>
+            </div>
+        </div>
+
+        <div class="card topic-card" data-topic="Queue" onclick="goTopic('/Topics/Queue')">
+            <h3>Queue</h3>
+            <p>FIFO — очереди задач, запросы, буферы.</p>
+            <div class="card-tag-row">
+                <span class="card-tag">enqueue</span>
+                <span class="card-tag">dequeue</span>
+            </div>
+        </div>
+
+        <div class="card topic-card" data-topic="Heap" onclick="goTopic('/Topics/Heap')">
+            <h3>Heap (Min/Max)</h3>
+            <p>Приоритетные очереди, поиск min/max за O(1), вставка/удаление за O(log n).</p>
+            <div class="card-tag-row">
+                <span class="card-tag">Priority Queue</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="dashboard-section">
+    <h2>Trees & Recursion</h2>
+    <p>Иерархии, поиск, рекурсивные обходы и префиксные структуры.</p>
+    <div class="card-grid">
+        <div class="card topic-card" data-topic="Recursion" onclick="goTopic('/Topics/Recursion')">
+            <h3>Recursion</h3>
+            <p>Дерево вызовов, стек, base/recursive case.</p>
+        </div>
+        <div class="card topic-card" data-topic="Binary Tree" onclick="goTopic('/Topics/BinaryTree')">
+            <h3>Binary Tree</h3>
+            <p>Деревья с 0–2 детьми, уровни, глубина, высота.</p>
+        </div>
+        <div class="card topic-card" data-topic="BST" onclick="goTopic('/Topics/BinarySearchTree')">
+            <h3>Binary Search Tree</h3>
+            <p>Вставка, поиск, удаление — всё через “лево-меньше / право-больше”.</p>
+        </div>
+        <div class="card topic-card" data-topic="Ternary Tree" onclick="goTopic('/Topics/TernaryTree')">
+            <h3>Ternary Tree</h3>
+            <p>3 потомка, баланс между ветвлением и глубиной.</p>
+        </div>
+        <div class="card topic-card" data-topic="TST" onclick="goTopic('/Topics/TernarySearchTree')">
+            <h3>Ternary Search Tree</h3>
+            <p>Префиксный поиск строк, альтернатива trie.</p>
+        </div>
+    </div>
+</section>
+
+<section class="dashboard-section">
+    <h2>Sorting & Searching</h2>
+    <p>Классика: сортировки и поиск элементов.</p>
+    <div class="card-grid">
+        <div class="card topic-card" data-topic="Sorting" onclick="goTopic('/Topics/SortingAlgorithms')">
+            <h3>Sorting Algorithms</h3>
+            <p>Bubble, Selection, Insertion, Quick, Merge — все в анимации.</p>
+        </div>
+        <div class="card topic-card" data-topic="Searching" onclick="goTopic('/Topics/SearchingAlgorithms')">
+            <h3>Searching Algorithms</h3>
+            <p>Linear vs Binary search — наглядное сравнение.</p>
+        </div>
+        <div class="card topic-card" data-topic="Radix" onclick="goTopic('/Topics/Radix')">
+            <h3>Radix Sort</h3>
+            <p>Поразрядная сортировка, buckets, разряды.</p>
+        </div>
+    </div>
+</section>
+
+<section class="dashboard-section">
+    <h2>Graphs & Shortest Paths</h2>
+    <p>Графы, веса, ориентированные рёбра и алгоритмы кратчайших путей.</p>
+    <div class="card-grid">
+        <div class="card topic-card" data-topic="Graph" onclick="goTopic('/Topics/Graph')">
+            <h3>Graph Basics</h3>
+            <p>Вершины, рёбра, adjacency list, клики по canvas.</p>
+        </div>
+        <div class="card topic-card" data-topic="Directed Graph" onclick="goTopic('/Topics/DirectedGraph')">
+            <h3>Directed Graph</h3>
+            <p>Рёбра со стрелками, ориентированные связи.</p>
+        </div>
+        <div class="card topic-card" data-topic="Undirected Graph" onclick="goTopic('/Topics/UndirectedGraph')">
+            <h3>Undirected Graph</h3>
+            <p>Неориентированные связи, симметричный adjacency list.</p>
+        </div>
+        <div class="card topic-card" data-topic="Weighted Graph" onclick="goTopic('/Topics/WeightedGraph')">
+            <h3>Weighted Graph</h3>
+            <p>Веса на рёбрах, подготовка к Dijkstra / Bellman–Ford.</p>
+        </div>
+        <div class="card topic-card" data-topic="Bellman-Ford" onclick="goTopic('/Topics/BellmanFord')">
+            <h3>Bellman–Ford</h3>
+            <p>Итеративная релаксация рёбер, работает с отрицательными весами.</p>
+        </div>
+        <div class="card topic-card" data-topic="Dijkstra" onclick="goTopic('/Topics/Dijkstra')">
+            <h3>Dijkstra</h3>
+            <p>Min-heap, посещённые вершины, расслабление рёбер.</p>
+        </div>
+        <div class="card topic-card" data-topic="A*" onclick="goTopic('/Topics/AStar')">
+            <h3>A* Pathfinding</h3>
+            <p>Grid, open/closed set, эвристика, маршрут от S до G.</p>
+        </div>
+    </div>
+</section>
+
+<script>
+const topicIndex = [
+    "array","sorting","sorting algorithms","searching","linked list","doubly",
+    "circular","recursion","tree","binary tree","bst","ternary","tst","radix",
+    "heap","queue","stack","graph","directed","undirected","weighted",
+    "bellman","dijkstra","a*","astar"
+];
+
+function goTopic(url) {
+    // плавное исчезновение и переход
+    const page = document.querySelector(".page");
+    if (page) {
+        page.classList.remove("page-visible");
+        setTimeout(() => {
+            window.location.href = url;
+        }, 180);
+    } else {
+        window.location.href = url;
+    }
+}
+
+function dashboardSearch() {
+    const q = document.getElementById("topicSearch").value.trim().toLowerCase();
+    if (!q) return;
+
+    const cards = document.querySelectorAll(".topic-card");
+    let found = null;
+
+    cards.forEach(card => {
+        const name = card.dataset.topic.toLowerCase();
+        if (!found && name.includes(q)) found = card;
+    });
+
+    if (found) {
+        found.classList.add("card-pulse");
+        setTimeout(() => found.classList.remove("card-pulse"), 800);
+        found.scrollIntoView({behavior: "smooth", block: "center"});
+    } else {
+        alert("Topic not found – попробуй: array, graph, dijkstra, a*...");
+    }
+}
+</script>

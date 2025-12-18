@@ -1,0 +1,108 @@
+@{
+    ViewData["Title"] = "Doubly Linked List";
+}
+
+<h1>Doubly Linked List — Insert/Delete & Visualization</h1>
+
+<p>
+    Doubly Linked List — список, где каждый узел содержит:
+</p>
+<ul>
+    <li><strong>prev</strong></li>
+    <li><strong>value</strong></li>
+    <li><strong>next</strong></li>
+</ul>
+
+<p>Более удобен для удаления и обхода в обе стороны.</p>
+
+<div class="visual-box">
+
+    <input id="dll-value" placeholder="Value" class="ll-input" />
+    <input id="dll-index" placeholder="Index" class="ll-input" />
+
+    <button onclick="dll_insertHead()">Insert Head</button>
+    <button onclick="dll_insertTail()">Insert Tail</button>
+    <button onclick="dll_insertIndex()">Insert Index</button>
+    <button onclick="dll_deleteIndex()">Delete Index</button>
+
+    <div id="dll-canvas" style="margin-top:20px; min-height:120px;"></div>
+</div>
+
+<style>
+.dll-node {
+    background:#1e232d;
+    padding:8px 14px;
+    border:1px solid #3a3f4b;
+    border-radius:6px;
+    color:white;
+    display:inline-block;
+    margin:5px;
+}
+.dll-arrow {
+    color:#58a6ff;
+    font-size:20px;
+    margin:0 5px;
+}
+</style>
+
+<script>
+let dll = [];
+
+function dll_render() {
+    let c = document.getElementById("dll-canvas");
+    c.innerHTML = "";
+
+    if (dll.length === 0) {
+        c.innerHTML = "<p style='color:#777'>Empty</p>";
+        return;
+    }
+
+    let prev = "null";
+    for (let i=0; i<dll.length; i++){
+        let block = document.createElement("div");
+        block.className = "dll-node";
+        block.innerHTML =
+            `<div style='font-size:12px;color:#999'>prev: ${i==0?'null':dll[i-1]}</div>` +
+            `<div style='font-size:16px;'>${dll[i]}</div>` +
+            `<div style='font-size:12px;color:#999'>next: ${i==dll.length-1?'null':dll[i+1]}</div>`;
+        c.appendChild(block);
+
+        if (i < dll.length - 1) {
+            let arrow = document.createElement("span");
+            arrow.className = "dll-arrow";
+            arrow.textContent = "⇄";
+            c.appendChild(arrow);
+        }
+    }
+}
+
+function dll_val() { return document.getElementById("dll-value").value.trim(); }
+function dll_idx() {
+    let x = document.getElementById("dll-index").value.trim();
+    if (x==="") return null;
+    return Number(x);
+}
+
+function dll_insertHead() {
+    let v=dll_val(); if(!v) return alert("value");
+    dll.unshift(v); dll_render();
+}
+
+function dll_insertTail() {
+    let v=dll_val(); if(!v) return alert("value");
+    dll.push(v); dll_render();
+}
+
+function dll_insertIndex() {
+    let v=dll_val(); if(!v) return alert("value");
+    let i=dll_idx(); if(i===null||i<0||i>dll.length) return alert("index");
+    dll.splice(i,0,v); dll_render();
+}
+
+function dll_deleteIndex() {
+    let i=dll_idx(); if(i===null||i<0||i>=dll.length) return alert("index");
+    dll.splice(i,1); dll_render();
+}
+
+dll_render();
+</script>

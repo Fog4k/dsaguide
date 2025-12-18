@@ -1,0 +1,77 @@
+@{
+    ViewData["Title"] = "Recursion Tree Visualizer";
+}
+
+<h1>Recursion — Call Tree Visualization</h1>
+
+<p>
+    Рекурсия — функция, вызывающая саму себя.  
+    Ниже можно визуализировать рекурсивное дерево вызовов для функции:
+</p>
+
+<pre style="background:#111;padding:10px;border-radius:6px;">
+f(n):
+    if n <= 1: return 1
+    return f(n-1) + f(n-2)
+</pre>
+
+<div class="visual-box">
+    <input id="rec-n" class="ll-input" placeholder="n (1–10)" />
+    <button onclick="rec_run()">Build Recursion Tree</button>
+
+    <div id="rec-canvas" style="margin-top:25px;"></div>
+</div>
+
+<style>
+.rec-node {
+    background:#1e232d;
+    border:1px solid #3a3f4b;
+    display:inline-block;
+    padding:8px 12px;
+    border-radius:6px;
+    color:white;
+    margin:5px;
+}
+.rec-branch {
+    text-align:center;
+}
+</style>
+
+<script>
+function rec_build(n){
+    if(n<=1) return { value:n, children:[] };
+
+    return {
+        value:n,
+        children:[
+            rec_build(n-1),
+            rec_build(n-2)
+        ]
+    };
+}
+
+function rec_renderNode(node){
+    let html = `<div class="rec-branch">
+                    <div class="rec-node">f(${node.value})</div>`;
+
+    if(node.children.length>0){
+        html += `<div>`;
+        for(let c of node.children){
+            html += rec_renderNode(c);
+        }
+        html += `</div>`;
+    }
+
+    html += `</div>`;
+    return html;
+}
+
+function rec_run(){
+    let n = Number(document.getElementById("rec-n").value);
+    if(isNaN(n)||n<1||n>10) return alert("Введите n от 1 до 10");
+
+    let tree = rec_build(n);
+    let c=document.getElementById("rec-canvas");
+    c.innerHTML = rec_renderNode(tree);
+}
+</script>

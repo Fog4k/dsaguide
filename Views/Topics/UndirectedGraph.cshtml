@@ -1,0 +1,93 @@
+@{
+    ViewData["Title"] = "Undirected Graph";
+}
+
+<h1>Undirected Graph — Visualization</h1>
+
+<div class="visual-box">
+
+    <button onclick="ug_clear()">Clear</button>
+
+    <h3 style="margin-top:15px;">Adjacency List</h3>
+    <pre id="ug-list" style="background:#111;padding:10px;border-radius:6px;"></pre>
+
+    <canvas id="ug-canvas" width="800" height="500"
+            style="margin-top:20px; background:#0d1117; border:1px solid #333; border-radius:8px;"></canvas>
+</div>
+
+<script>
+let ug_nodes=[];
+let ug_edges=[];
+let ug_sel=null;
+
+const ugc=document.getElementById("ug-canvas");
+const uctx=ugc.getContext("2d");
+
+ugc.addEventListener("click", ug_click);
+
+function ug_click(e){
+    let r=ugc.getBoundingClientRect();
+    let x=e.clientX-r.left, y=e.clientY-r.top;
+    let hit = ug_findNode(x,y);
+
+    if(hit){
+        if(ug_sel===null) ug_sel=hit;
+        else if(ug_sel!==hit){
+            ug_edges.push([ug_sel,hit]);
+            ug_sel=null;
+        }
+    } else {
+        ug_nodes.push({x,y,id:ug_nodes.length});
+    }
+    ug_draw();
+}
+
+function ug_findNode(x,y){
+    return ug_nodes.find(n=>Math.hypot(n.x-x,n.y-y)<20) || null;
+}
+
+function ug_draw(){
+    uctx.clearRect(0,0,800,500);
+
+    // edges
+    uctx.strokeStyle="#aaa"; uctx.lineWidth=2;
+    for(let [a,b] of ug_edges){
+        uctx.beginPath();
+        uctx.moveTo(a.x,a.y);
+        uctx.lineTo(b.x,b.y);
+        uctx.stroke();
+    }
+
+    // nodes
+    for(let n of ug_nodes){
+        uctx.beginPath();
+        uctx.fillStyle=(n===ug_sel? "#ffd966" : "#58a6ff");
+        uctx.arc(n.x,n.y,18,0,Math.PI*2);
+        uctx.fill();
+
+        uctx.fillStyle="black";
+        uctx.fillText(n.id,n.x-4,n.y+4);
+    }
+
+    ug_updateList();
+}
+
+function ug_updateList(){
+    let adj={};
+    for(let n of ug_nodes) adj[n.id]=[];
+    for(let [a,b] of ug_edges){
+        adj[a.id].push(b.id);
+        adj[b.id].push(a.id);
+    }
+    document.getElementById("ug-list").innerText = JSON.stringify(adj,null,2);
+}
+
+function ug_clear(){
+    ug_nodes=[];
+    ug_edges=[];
+    ug_sel=null;
+    ug_draw();
+}
+
+ug_draw();
+</script>

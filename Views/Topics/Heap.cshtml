@@ -1,0 +1,185 @@
+@{
+    ViewData["Title"] = "Heap (Min/Max) Visualizer";
+}
+
+<h1>Heap — Min/Max Heap Visualization</h1>
+
+<p>
+    Heap — полное бинарное дерево.  
+    Min-Heap: root — минимальный элемент.  
+    Max-Heap: root — максимальный элемент.
+</p>
+
+<div class="visual-box">
+
+    <input id="heap-value" class="ll-input" placeholder="Value" />
+    <button onclick="heap_insert()">Insert</button>
+    <button onclick="heap_remove()">Remove Root</button>
+
+    <button onclick="heap_toggleMode()">Toggle Min/Max</button>
+
+    <div style="margin-top:15px;color:#58a6ff" id="heap-mode">Mode: Min-Heap</div>
+
+    <h3 style="margin-top:30px;">Heap Array</h3>
+    <div id="heap-array"></div>
+
+    <h3 style="margin-top:30px;">Tree Visualization</h3>
+    <div id="heap-tree"></div>
+</div>
+
+<style>
+.heap-box {
+    display:inline-block;
+    padding:10px 12px;
+    margin:4px;
+    background:#1e232d;
+    border:1px solid #3a3f4b;
+    border-radius:6px;
+    min-width:40px;
+    color:white;
+    text-align:center;
+}
+.heap-node {
+    padding:8px 12px;
+    margin:6px;
+    background:#1e232d;
+    border:1px solid #3a3f4b;
+    border-radius:6px;
+    display:inline-block;
+}
+.heap-branch {
+    text-align:center;
+}
+.heap-children {
+    display:flex;
+    justify-content:center;
+}
+</style>
+
+<script>
+let heap=[];
+let isMin=true;
+
+function heap_parent(i){ return Math.floor((i-1)/2); }
+function heap_left(i){ return i*2+1; }
+function heap_right(i){ return i*2+2; }
+
+function heap_compare(a,b){
+    return isMin ? a<b : a>b;
+}
+
+function heap_swap(i,j){
+    [heap[i],heap[j]]=[heap[j],heap[i]];
+}
+
+/* Insert */
+function heap_insert(){
+    let v=document.getElementById("heap-value").value.trim();
+    if(v==="") return alert("Enter value");
+    v=Number(v);
+    heap.push(v);
+    heap_up(heap.length-1);
+    heap_render();
+}
+
+function heap_up(i){
+    while(i>0){
+        let p=heap_parent(i);
+        if(heap_compare(heap[i],heap[p])){
+            heap_swap(i,p);
+            i=p;
+        } else break;
+    }
+}
+
+/* Remove root */
+function heap_remove(){
+    if(heap.length===0) return;
+    heap[0]=heap[heap.length-1];
+    heap.pop();
+    heap_down(0);
+    heap_render();
+}
+
+function heap_down(i){
+    let n=heap.length;
+
+    while(true){
+        let l=heap_left(i);
+        let r=heap_right(i);
+        let best=i;
+
+        if(l<n && heap_compare(heap[l],heap[best])) best=l;
+        if(r<n && heap_compare(heap[r],heap[best])) best=r;
+
+        if(best!==i){
+            heap_swap(i,best);
+            i=best;
+        } else break;
+    }
+}
+
+/* Toggle mode */
+function heap_toggleMode(){
+    isMin=!isMin;
+    document.getElementById("heap-mode").innerText=
+        "Mode: "+(isMin?"Min-Heap":"Max-Heap");
+
+    let vals=[...heap];
+    heap=[];
+    for(let v of vals) heap_insertValue(v);
+    heap_render();
+}
+
+function heap_insertValue(v){
+    heap.push(v);
+    heap_up(heap.length-1);
+}
+
+/* Rendering */
+function heap_renderArray(){
+    let c=document.getElementById("heap-array");
+    c.innerHTML="";
+    heap.forEach(v=>{
+        let el=document.createElement("div");
+        el.className="heap-box";
+        el.textContent=v;
+        c.appendChild(el);
+    });
+}
+
+function heap_renderNode(i){
+    if(i>=heap.length) return "";
+
+    let html=`<div class='heap-branch'>
+                <div class='heap-node'>${heap[i]}</div>`;
+
+    let l=heap_left(i);
+    let r=heap_right(i);
+
+    if(l<heap.length || r<heap.length){
+        html+=`<div class='heap-children'>
+                 <div>${heap_renderNode(l)}</div>
+                 <div>${heap_renderNode(r)}</div>
+               </div>`;
+    }
+    html+=`</div>`;
+    return html;
+}
+
+function heap_renderTree(){
+    let c=document.getElementById("heap-tree");
+    if(heap.length===0){
+        c.innerHTML="<p style='color:#777'>Heap empty</p>";
+        return;
+    }
+    c.innerHTML=heap_renderNode(0);
+}
+
+function heap_render(){
+    heap_renderArray();
+    heap_renderTree();
+}
+
+heap_render();
+</script>

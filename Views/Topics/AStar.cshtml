@@ -1,0 +1,169 @@
+@{
+    ViewData["Title"] = "A* Pathfinding";
+}
+
+<h1>A* Pathfinding — Grid Visualization</h1>
+
+<p>
+Кликайте по клеткам чтобы поставить:
+</p>
+<ul>
+    <li>Старт — S</li>
+    <li>Финиш — G</li>
+    <li>Стены — блоки</li>
+</ul>
+
+<div class="visual-box">
+    <button onclick="astar_reset()">Reset</button>
+    <button onclick="astar_run()">Run A*</button>
+
+    <canvas id="as-canvas" width="600" height="600"
+            style="margin-top:20px; background:#0d1117; border:1px solid #333;"></canvas>
+</div>
+
+<style>
+</style>
+
+<script>
+const size=30;
+let grid=[];
+let start=null;
+let goal=null;
+
+let asc=document.getElementById("as-canvas");
+let actx=asc.getContext("2d");
+let cell=20;
+
+function astar_init(){
+    grid=[];
+    for(let i=0;i<size;i++){
+        let row=[];
+        for(let j=0;j<size;j++){
+            row.push({wall:false});
+        }
+        grid.push(row);
+    }
+    astar_draw();
+}
+
+asc.addEventListener("click", e=>{
+    let r=asc.getBoundingClientRect();
+    let x=Math.floor((e.clientX-r.left)/cell);
+    let y=Math.floor((e.clientY-r.top)/cell);
+
+    if(!start){
+        start={x,y};
+    }
+    else if(!goal){
+        goal={x,y};
+    }
+    else{
+        grid[y][x].wall=!grid[y][x].wall;
+    }
+
+    astar_draw();
+});
+
+function astar_draw(){
+    actx.clearRect(0,0,600,600);
+
+    for(let y=0;y<size;y++){
+        for(let x=0;x<size;x++){
+            if(grid[y][x].wall){
+                actx.fillStyle="#222";
+            } else actx.fillStyle="#111";
+            actx.fillRect(x*cell,y*cell,cell-1,cell-1);
+        }
+    }
+
+    if(start){
+        actx.fillStyle="yellow";
+        actx.fillRect(start.x*cell,start.y*cell,cell-1,cell-1);
+    }
+    if(goal){
+        actx.fillStyle="red";
+        actx.fillRect(goal.x*cell,goal.y*cell,cell-1,cell-1);
+    }
+}
+
+function h(a,b){
+    return Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
+}
+
+async function astar_run(){
+    if(!start||!goal) return alert("Place start and goal");
+
+    let open=[], closed=new Set();
+    open.push({x:start.x, y:start.y, g:0, f:h(start,goal), parent:null});
+
+    function key(n){ return n.x+","+n.y; }
+
+    while(open.length>0){
+        open.sort((a,b)=>a.f-b.f);
+        let current=open.shift();
+
+        if(current.x===goal.x && current.y===goal.y){
+            astar_path(current);
+            return;
+        }
+
+        closed.add(key(current));
+
+        let dirs=[[1,0],[-1,0],[0,1],[0,-1]];
+        for(let [dx,dy] of dirs){
+            let nx=current.x+dx;
+            let ny=current.y+dy;
+            if(nx<0||ny<0||nx>=size||ny>=size) continue;
+            if(grid[ny][nx].wall) continue;
+
+            if(closed.has(nx+","+ny)) continue;
+
+            let g=current.g+1;
+            let f=g+h({x:nx,y:ny},goal);
+
+            let exist=open.find(n=>n.x===nx&&n.y===ny);
+            if(exist){
+                if(g<exist.g){
+                    exist.g=g;
+                    exist.f=f;
+                    exist.parent=current;
+                }
+            } else {
+                open.push({x:nx,y:ny,g,f,parent:current});
+            }
+        }
+
+        astar_draw();
+        actx.fillStyle="rgba(0,128,255,0.3)";
+        for(let n of open){
+            actx.fillRect(n.x*cell,n.y*cell,cell,cell);
+        }
+
+        actx.fillStyle="rgba(255,0,0,0.3)";
+        for(let c of closed){
+            let [cx,cy]=c.split(",").map(Number);
+            actx.fillRect(cx*cell,cy*cell,cell,cell);
+        }
+
+        await new Promise(r=>setTimeout(r,40));
+    }
+
+    alert("No path found.");
+}
+
+function astar_path(n){
+    while(n){
+        actx.fillStyle="#00ff00";
+        actx.fillRect(n.x*cell,n.y*cell,cell,cell);
+        n=n.parent;
+    }
+}
+
+function astar_reset(){
+    start=null;
+    goal=null;
+    astar_init();
+}
+
+astar_init();
+</script>

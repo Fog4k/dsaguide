@@ -1,0 +1,116 @@
+@{
+    ViewData["Title"] = "Graph Visualizer";
+}
+
+<h1>Graph — Visualization</h1>
+
+<p>
+    Click on canvas to add nodes.  
+    Click 1st node → then 2nd node → создастся edge.
+</p>
+
+<div class="visual-box">
+
+    <button onclick="g_clear()">Clear</button>
+
+    <h3 style="margin-top:20px;">Adjacency List</h3>
+    <pre id="g-list" style="background:#111;padding:10px;border-radius:6px;"></pre>
+
+    <canvas id="g-canvas" width="800" height="500"
+            style="margin-top:20px; background:#0d1117; border:1px solid #333; border-radius:8px;"></canvas>
+</div>
+
+<style>
+.g-node {
+    fill:#58a6ff;
+}
+</style>
+
+<script>
+let g_nodes=[];
+let g_edges=[];
+let g_selected=null;
+
+const gc = document.getElementById("g-canvas");
+const ctx = gc.getContext("2d");
+
+gc.addEventListener("click", g_click);
+
+function g_click(e){
+    let rect = gc.getBoundingClientRect();
+    let x = e.clientX - rect.left;
+    let y = e.clientY - rect.top;
+
+    let clicked = g_findNode(x,y);
+
+    if(clicked){
+        if(g_selected === null){
+            g_selected = clicked;
+        } else if(g_selected !== clicked){
+            g_edges.push([g_selected, clicked]);
+            g_selected=null;
+        }
+    } else {
+        g_nodes.push({x,y,id:g_nodes.length});
+    }
+
+    g_render();
+}
+
+function g_findNode(x,y){
+    for(let n of g_nodes){
+        let d = Math.hypot(n.x-x, n.y-y);
+        if(d<20) return n;
+    }
+    return null;
+}
+
+function g_render(){
+    ctx.clearRect(0,0,800,500);
+
+    // Draw edges
+    ctx.strokeStyle="#666";
+    ctx.lineWidth=2;
+    for(let [a,b] of g_edges){
+        ctx.beginPath();
+        ctx.moveTo(a.x,a.y);
+        ctx.lineTo(b.x,b.y);
+        ctx.stroke();
+    }
+
+    // Draw nodes
+    for(let n of g_nodes){
+        ctx.beginPath();
+        ctx.fillStyle = (n===g_selected? "#ffd966" : "#58a6ff");
+        ctx.arc(n.x,n.y,18,0,Math.PI*2);
+        ctx.fill();
+
+        ctx.fillStyle="black";
+        ctx.font="12px sans-serif";
+        ctx.fillText(n.id, n.x-4, n.y+4);
+    }
+
+    g_updateList();
+}
+
+function g_updateList(){
+    let adj={};
+    for(let n of g_nodes){
+        adj[n.id] = [];
+    }
+    for(let [a,b] of g_edges){
+        adj[a.id].push(b.id);
+        adj[b.id].push(a.id);
+    }
+    document.getElementById("g-list").innerText = JSON.stringify(adj,null,2);
+}
+
+function g_clear(){
+    g_nodes=[];
+    g_edges=[];
+    g_selected=null;
+    g_render();
+}
+
+g_render();
+</script>

@@ -1,0 +1,137 @@
+@{
+    ViewData["Title"] = "Bellman–Ford";
+}
+
+<h1>Bellman–Ford — Shortest Path Visualization</h1>
+
+<p>
+Алгоритм работает даже с отрицательными весами.  
+Каждая итерация проходит по всем рёбрам и делает "relaxation".
+</p>
+
+<div class="visual-box">
+    <button onclick="bf_addNode()">Add Node</button>
+    <button onclick="bf_start()">Start Algorithm</button>
+    <button onclick="bf_clear()">Clear</button>
+
+    <input id="bf-source" class="ll-input" placeholder="Source ID" />
+
+    <canvas id="bf-canvas" width="850" height="520"
+        style="background:#0d1117; border:1px solid #333; margin-top:20px; border-radius:8px;"></canvas>
+
+    <h3 style="margin-top:15px;">Distances</h3>
+    <pre id="bf-dist" style="background:#111; padding:10px; border-radius:6px;"></pre>
+</div>
+
+<style>
+.bf-node {
+    fill:#58a6ff;
+}
+</style>
+
+<script>
+let bf_nodes=[];
+let bf_edges=[];
+let bf_sel=null;
+
+const bfc=document.getElementById("bf-canvas");
+const bctx=bfc.getContext("2d");
+
+bfc.addEventListener("click", bf_click);
+
+function bf_click(e){
+    let r=bfc.getBoundingClientRect();
+    let x=e.clientX-r.left, y=e.clientY-r.top;
+
+    let hit=bf_find(x,y);
+    if(hit){
+        if(bf_sel===null){
+            bf_sel=hit;
+        } else if(bf_sel!==hit){
+            let w=prompt("Weight:");
+            if(w!==null && w.trim()!==""){
+                bf_edges.push([bf_sel,hit,Number(w)]);
+            }
+            bf_sel=null;
+        }
+    } else {
+        bf_nodes.push({x,y,id:bf_nodes.length});
+    }
+
+    bf_render();
+}
+
+function bf_find(x,y){
+    return bf_nodes.find(n=>Math.hypot(n.x-x,n.y-y)<20) || null;
+}
+
+function bf_addNode(){
+    bf_nodes.push({x:100+Math.random()*600, y:100+Math.random()*350, id:bf_nodes.length});
+    bf_render();
+}
+
+function bf_render(){
+    bctx.clearRect(0,0,850,520);
+
+    // edges
+    bctx.strokeStyle="#aaa"; bctx.lineWidth=2;
+    bctx.fillStyle="#aaa";
+    for(let [a,b,w] of bf_edges){
+        bctx.beginPath();
+        bctx.moveTo(a.x,a.y);
+        bctx.lineTo(b.x,b.y);
+        bctx.stroke();
+        let mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+        bctx.fillText(w,mx,my);
+    }
+
+    // nodes
+    for(let n of bf_nodes){
+        bctx.beginPath();
+        bctx.fillStyle=(n===bf_sel? "#ffd966" : "#58a6ff");
+        bctx.arc(n.x,n.y,18,0,Math.PI*2);
+        bctx.fill();
+        bctx.fillStyle="black";
+        bctx.fillText(n.id,n.x-4,n.y+4);
+    }
+}
+
+async function bf_start(){
+    let s=document.getElementById("bf-source").value.trim();
+    if(s==="") return alert("Enter source ID");
+    s=Number(s);
+
+    let dist={};
+    for(let n of bf_nodes) dist[n.id]=Infinity;
+    dist[s]=0;
+
+    // |V|-1 iterations
+    for(let i=0;i<bf_nodes.length-1;i++){
+        for(let [a,b,w] of bf_edges){
+            if(dist[a.id]+w < dist[b.id]){
+                dist[b.id]=dist[a.id]+w;
+            }
+        }
+
+        bf_update(dist);
+        await new Promise(r=>setTimeout(r,900));
+    }
+
+    alert("Bellman-Ford Completed");
+}
+
+function bf_update(dist){
+    document.getElementById("bf-dist").innerText =
+        JSON.stringify(dist,null,2);
+}
+
+function bf_clear(){
+    bf_nodes=[];
+    bf_edges=[];
+    bf_sel=null;
+    bf_render();
+    document.getElementById("bf-dist").innerText="";
+}
+
+bf_render();
+</script>

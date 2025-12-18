@@ -1,0 +1,140 @@
+@{
+    ViewData["Title"] = "Singly Linked List";
+}
+
+<h1>Singly Linked List — Insert/Delete & Visualization</h1>
+
+<p>
+    Linked List — структура данных, где каждый узел содержит:
+</p>
+<ul>
+    <li><strong>value</strong> — данные узла</li>
+    <li><strong>next</strong> — указатель на следующий узел</li>
+</ul>
+
+<p>
+    Вставка и удаление выполняются за <strong>O(1)</strong> (если знаем нужный узел),  
+    поиск — <strong>O(n)</strong>.
+</p>
+
+<div class="visual-box">
+    <h3>Linked List Visualizer</h3>
+
+    <div style="margin-top:20px;">
+        <input id="ll-value" placeholder="Value" class="ll-input" />
+
+        <input id="ll-index" placeholder="Index (optional)" class="ll-input" />
+
+        <button onclick="ll_insertHead()">Insert Head</button>
+        <button onclick="ll_insertTail()">Insert Tail</button>
+        <button onclick="ll_insertIndex()">Insert Index</button>
+        <button onclick="ll_deleteHead()">Delete Head</button>
+        <button onclick="ll_deleteIndex()">Delete Index</button>
+    </div>
+
+    <div id="ll-canvas" style="margin-top:25px; min-height:100px;"></div>
+</div>
+
+<style>
+.ll-node {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 18px;
+    background:#1e232d;
+    border:1px solid #3a3f4b;
+    border-radius:6px;
+    margin: 5px;
+    color:white;
+    font-weight:600;
+}
+.ll-arrow {
+    display:inline-block;
+    color:#58a6ff;
+    margin:0 6px;
+    font-size:20px;
+}
+.ll-input {
+    padding:8px 12px; 
+    background:#0d1117;
+    border:1px solid #30363d;
+    color:white;
+}
+</style>
+
+<script>
+let ll = [];
+
+function ll_render() {
+    let c = document.getElementById("ll-canvas");
+    c.innerHTML = "";
+
+    if (ll.length === 0) {
+        c.innerHTML = "<p style='color:#777'>List is empty</p>";
+        return;
+    }
+
+    for (let i = 0; i < ll.length; i++) {
+        let node = document.createElement("div");
+        node.className = "ll-node";
+        node.textContent = ll[i];
+        c.appendChild(node);
+
+        if (i < ll.length - 1) {
+            let arrow = document.createElement("span");
+            arrow.className = "ll-arrow";
+            arrow.textContent = "→";
+            c.appendChild(arrow);
+        }
+    }
+
+    // null tail
+    let nullEnd = document.createElement("span");
+    nullEnd.className = "ll-arrow";
+    nullEnd.textContent = "→ null";
+    c.appendChild(nullEnd);
+}
+
+function ll_val() {
+    return document.getElementById("ll-value").value.trim();
+}
+
+function ll_idx() {
+    let x = document.getElementById("ll-index").value.trim();
+    if (x === "") return null;
+    return Number(x);
+}
+
+function ll_insertHead() {
+    let v = ll_val(); if (!v) return alert("Enter value");
+    ll.unshift(v);
+    ll_render();
+}
+
+function ll_insertTail() {
+    let v = ll_val(); if (!v) return alert("Enter value");
+    ll.push(v);
+    ll_render();
+}
+
+function ll_insertIndex() {
+    let v = ll_val(); if (!v) return alert("Enter value");
+    let i = ll_idx(); if (i === null || i < 0 || i > ll.length) return alert("Invalid index");
+    ll.splice(i, 0, v);
+    ll_render();
+}
+
+function ll_deleteHead() {
+    if (ll.length === 0) return;
+    ll.shift();
+    ll_render();
+}
+
+function ll_deleteIndex() {
+    let i = ll_idx(); if (i === null || i < 0 || i >= ll.length) return alert("Invalid index");
+    ll.splice(i, 1);
+    ll_render();
+}
+
+ll_render();
+</script>

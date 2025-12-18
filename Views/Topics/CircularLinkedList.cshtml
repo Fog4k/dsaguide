@@ -1,0 +1,81 @@
+@{
+    ViewData["Title"] = "Circular Linked List";
+}
+
+<h1>Circular Linked List — Visualization</h1>
+
+<p>
+    Circular Linked List — последний узел указывает на первый.  
+    Отлично подходит для круговых очередей / циклических задач.
+</p>
+
+<div class="visual-box">
+
+    <input id="cll-value" placeholder="Value" class="ll-input" />
+    <button onclick="cll_add()">Add</button>
+    <button onclick="cll_remove()">Remove Last</button>
+
+    <div id="cll-canvas" style="margin-top:20px; min-height:140px;"></div>
+</div>
+
+<style>
+.cll-node {
+    background:#1e232d;
+    border:1px solid #3a3f4b;
+    padding:8px 14px;
+    border-radius:6px;
+    display:inline-block;
+    color:white;
+    margin:5px;
+}
+.cll-arrow {
+    color:#58a6ff;
+    font-size:20px;
+    margin:0 5px;
+}
+</style>
+
+<script>
+let cll=[];
+
+function cll_render(){
+    let c=document.getElementById("cll-canvas");
+    c.innerHTML="";
+
+    if(cll.length===0){
+        c.innerHTML="<p style='color:#777'>Empty</p>";
+        return;
+    }
+
+    for(let i=0;i<cll.length;i++){
+        let n=document.createElement("span");
+        n.className="cll-node";
+        n.textContent=cll[i];
+        c.appendChild(n);
+
+        let arrow=document.createElement("span");
+        arrow.className="cll-arrow";
+        arrow.textContent="→";
+        c.appendChild(arrow);
+    }
+
+    // last → first
+    let loop = document.createElement("span");
+    loop.className="cll-arrow";
+    loop.textContent="⟳ (to first)";
+    c.appendChild(loop);
+}
+
+function cll_add(){
+    let v=document.getElementById("cll-value").value.trim();
+    if(!v) return alert("value");
+    cll.push(v); cll_render();
+}
+
+function cll_remove(){
+    if(cll.length===0) return;
+    cll.pop(); cll_render();
+}
+
+cll_render();
+</script>

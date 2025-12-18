@@ -1,0 +1,134 @@
+@{
+    ViewData["Title"] = "Radix Sort Visualizer";
+}
+
+<h1>Radix Sort — Bucket Visualization</h1>
+
+<p>
+    Radix Sort (LSD) сортирует числа поразрядно, с 0-го разряда (единицы) к старшему разряду.
+    Каждый проход использует 10 корзин (0–9).
+</p>
+
+<div class="visual-box">
+
+    <button onclick="radix_generate()">Generate</button>
+    <button onclick="radix_sort()">Run Radix Sort</button>
+    <button onclick="radix_clear()">Clear</button>
+
+    <div id="radix-array" style="margin-top:20px;"></div>
+    <div id="radix-buckets" style="margin-top:30px;"></div>
+
+</div>
+
+<style>
+.rad-val {
+    display:inline-block;
+    padding:10px 14px;
+    margin:4px;
+    background:#1e232d;
+    border:1px solid #3a3f4b;
+    border-radius:6px;
+    color:white;
+    min-width:40px;
+    text-align:center;
+}
+.rad-bucket {
+    display:inline-block;
+    vertical-align:top;
+    padding:10px;
+    margin:6px;
+    background:#111;
+    border:1px solid #333;
+    border-radius:6px;
+    width:80px;
+    color:#999;
+}
+.rad-bucket span {
+    display:block;
+    margin-top:6px;
+    padding:8px;
+    background:#1e232d;
+    border:1px solid #3a3f4b;
+    border-radius:6px;
+    color:white;
+}
+</style>
+
+<script>
+let radixArr=[];
+
+function radix_renderArray(){
+    let c=document.getElementById("radix-array");
+    c.innerHTML="";
+    radixArr.forEach(v=>{
+        let el=document.createElement("span");
+        el.className="rad-val";
+        el.textContent=v;
+        c.appendChild(el);
+    });
+}
+
+function radix_renderBuckets(buckets){
+    let c=document.getElementById("radix-buckets");
+    c.innerHTML="";
+
+    for(let i=0;i<10;i++){
+        let b=document.createElement("div");
+        b.className="rad-bucket";
+        b.innerHTML="<strong>"+i+"</strong>";
+
+        buckets[i].forEach(v=>{
+            let a=document.createElement("span");
+            a.textContent=v;
+            b.appendChild(a);
+        });
+        c.appendChild(b);
+    }
+}
+
+function radix_generate(){
+    radixArr=[];
+    for(let i=0;i<10;i++){
+        radixArr.push(Math.floor(Math.random()*900)+100);
+    }
+    radix_renderArray();
+}
+
+function radix_clear(){
+    radixArr=[];
+    document.getElementById("radix-array").innerHTML="";
+    document.getElementById("radix-buckets").innerHTML="";
+}
+
+async function radix_sort(){
+    if(radixArr.length===0) return;
+
+    let max = Math.max(...radixArr).toString().length;
+
+    for(let d=0;d<max;d++){
+        let buckets=[[],[],[],[],[],[],[],[],[],[]];
+
+        for(let num of radixArr){
+            let digit = Math.floor(num/Math.pow(10,d)) % 10;
+            buckets[digit].push(num);
+        }
+
+        radix_renderBuckets(buckets);
+        await new Promise(r=>setTimeout(r,1000));
+
+        radixArr=[];
+        for(let b of buckets){
+            for(let v of b){
+                radixArr.push(v);
+            }
+        }
+
+        radix_renderArray();
+        await new Promise(r=>setTimeout(r,500));
+    }
+
+    alert("Radix Sort Completed!");
+}
+
+radix_generate();
+</script>
